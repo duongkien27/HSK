@@ -1,4 +1,10 @@
 /* ===== HSK Review App (shared across levels via APP_CONFIG) ===== */
+const SPEAKER_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-speaker" aria-hidden="true"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06ZM18.584 5.106a.75.75 0 0 1 1.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 1 1-1.06-1.06 8.25 8.25 0 0 0 0-11.668.75.75 0 0 1 0-1.06Z"/><path d="M15.932 7.757a.75.75 0 0 1 1.061 0 6 6 0 0 1 0 8.486.75.75 0 0 1-1.06-1.061 4.5 4.5 0 0 0 0-6.364.75.75 0 0 1 0-1.06Z"/></svg>';
+const HOME_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-nav" aria-hidden="true"><path d="M12 2 3 10.5 5.5 10.5 5.5 21 18.5 21 18.5 10.5 21 10.5Z"/></svg>';
+const BOOK_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-nav" aria-hidden="true"><path d="M2 5 11 3 11 19 2 21Z"/><path d="M22 5 13 3 13 19 22 21Z"/></svg>';
+const CARDS_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-nav" aria-hidden="true"><rect x="7" y="2" width="13" height="9" rx="1.8" opacity="0.4"/><rect x="4" y="7" width="13" height="9" rx="1.8"/></svg>';
+const CHECK_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-ui" aria-hidden="true"><path d="M9.55 17.65 4.4 12.5l1.65-1.65 3.5 3.5 8.4-8.4 1.65 1.65Z"/></svg>';
+const STAR_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" class="icon-ui" aria-hidden="true"><path d="M12,3 L13.6,9.1 L20.56,9.22 L15.42,13.11 L17.29,19.28 L12,15.6 L6.71,19.28 L8.58,13.11 L3.44,9.22 L10.4,9.1 Z"/></svg>';
 const LESSONS = APP_CONFIG.data.lessons;
 const POS_TABLE = APP_CONFIG.data.pos_table;
 
@@ -111,9 +117,11 @@ function buildSidebar() {
       <span class="ltitle">${l.title_vn}</span>
     </a>
   `).join('');
+  const NAV_ICONS = { home: HOME_ICON_SVG, 'vocab-all': BOOK_ICON_SVG, flashcard: CARDS_ICON_SVG };
   document.querySelectorAll('.nav-item').forEach(el => {
     const r = el.getAttribute('data-route');
     if (r) el.setAttribute('data-nav', r);
+    if (r && NAV_ICONS[r]) el.innerHTML = `${NAV_ICONS[r]} ${el.textContent.trim()}`;
   });
 }
 
@@ -125,7 +133,7 @@ function renderHome(main) {
   main.innerHTML = `
     <div class="main-inner">
       <div class="hero">
-        <h1>欢迎 · Chào mừng bạn trở lại! 👋</h1>
+        <h1>欢迎 · Chào mừng bạn!</h1>
         <p>Ôn tập từ vựng, ngữ pháp và bài khóa của giáo trình ${APP_CONFIG.bookLabelHtml} (chuẩn 3.0, bản tiếng Việt) — đầy đủ ${LESSONS.length} bài.</p>
       </div>
       <div class="stat-grid">
@@ -136,11 +144,11 @@ function renderHome(main) {
         <div class="stat-card"><div class="num" id="homeKnownCount">${knownCount()}</div><div class="label">Từ đã thuộc</div></div>
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 10px;">
-        <a href="#/vocab-all"><button class="btn btn-primary">📚 Xem toàn bộ từ vựng</button></a>
-        <a href="#/flashcard"><button class="btn btn-ghost">🧠 Bắt đầu Flashcard</button></a>
+        <a href="#/vocab-all"><button class="btn btn-primary">Xem toàn bộ từ vựng</button></a>
+        <a href="#/flashcard"><button class="btn btn-ghost">Bắt đầu Flashcard</button></a>
       </div>
 
-      <div class="section-title">📖 Danh sách bài học</div>
+      <div class="section-title">Danh sách bài học</div>
       <div class="lesson-grid">
         ${LESSONS.map(l => `
           <a class="lesson-card" href="#/lesson/${l.id}/vocab">
@@ -152,7 +160,7 @@ function renderHome(main) {
         `).join('')}
       </div>
 
-      <div class="section-title">🔤 Chú thích viết tắt từ loại</div>
+      <div class="section-title">Chú thích viết tắt từ loại</div>
       <table class="legend-table">
         <thead><tr><th>Hán tự</th><th>Tiếng Việt</th><th>Viết tắt</th></tr></thead>
         <tbody>
@@ -168,14 +176,15 @@ function vocabRowHtml(v, opts = {}) {
   const known = isKnown(v.key);
   return `
     <div class="vocab-row ${known ? 'known' : ''}" data-key="${v.key}">
-      <button class="vspeak" data-speak="${encodeURIComponent(v.hanzi)}" title="Phát âm">🔊</button>
+      <button class="vspeak" data-speak="${encodeURIComponent(v.hanzi)}" title="Phát âm">${SPEAKER_ICON_SVG}</button>
       <div class="vhanzi hanzi">${v.hanzi}</div>
       <div class="vmid">
         <span class="vpinyin">${v.pinyin}</span><span class="vpos">${v.pos || ''}</span>
         <div class="vvn">${v.vn}</div>
       </div>
       ${opts.showLesson ? `<div class="vlesson">Bài ${v.lessonId}</div>` : ''}
-      <button class="icon-btn know-toggle" data-key="${v.key}" title="Đánh dấu đã thuộc" style="background:${known ? '#e1f3e4' : 'var(--line)'}; color:${known ? 'var(--green)' : 'var(--muted)'};">${known ? '✓' : '☆'}</button>
+      <button class="vwrite" data-write="${encodeURIComponent(v.hanzi)}" data-pinyin="${encodeURIComponent(v.pinyin)}" data-vn="${encodeURIComponent(v.vn || '')}" title="Thứ tự viết nét chữ">Thứ tự viết nét chữ</button>
+      <button class="icon-btn know-toggle" data-key="${v.key}" title="Đánh dấu đã thuộc" style="background:${known ? '#e1f3e4' : 'var(--line)'}; color:${known ? 'var(--green)' : 'var(--muted)'};">${known ? CHECK_ICON_SVG : STAR_ICON_SVG}</button>
     </div>
   `;
 }
@@ -184,6 +193,13 @@ function attachVocabRowEvents(container) {
   container.querySelectorAll('[data-speak]').forEach(btn => {
     btn.addEventListener('click', () => speak(decodeURIComponent(btn.getAttribute('data-speak'))));
   });
+  container.querySelectorAll('[data-write]').forEach(btn => {
+    btn.addEventListener('click', () => openStrokeModal({
+      hanzi: decodeURIComponent(btn.getAttribute('data-write')),
+      pinyin: decodeURIComponent(btn.getAttribute('data-pinyin')),
+      vn: decodeURIComponent(btn.getAttribute('data-vn'))
+    }));
+  });
   container.querySelectorAll('.know-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.getAttribute('data-key');
@@ -191,7 +207,7 @@ function attachVocabRowEvents(container) {
       const row = container.querySelector(`.vocab-row[data-key="${key}"]`);
       const known = isKnown(key);
       row.classList.toggle('known', known);
-      btn.textContent = known ? '✓' : '☆';
+      btn.innerHTML = known ? CHECK_ICON_SVG : STAR_ICON_SVG;
       btn.style.background = known ? '#e1f3e4' : 'var(--line)';
       btn.style.color = known ? 'var(--green)' : 'var(--muted)';
       const hc = document.getElementById('homeKnownCount');
@@ -204,7 +220,7 @@ function attachVocabRowEvents(container) {
 function renderVocabAll(main) {
   main.innerHTML = `
     <div class="main-inner">
-      <div class="section-title">📚 Toàn bộ từ vựng (${ALL_VOCAB.length} từ)</div>
+      <div class="section-title">Toàn bộ từ vựng (${ALL_VOCAB.length} từ)</div>
       <div class="vocab-toolbar">
         <input type="search" id="vocabAllSearch" placeholder="Lọc theo Hán tự / pinyin / nghĩa…" value="${escapeHtml(state.searchQuery)}">
         <select id="vocabAllLesson">
@@ -263,15 +279,15 @@ function renderLesson(main, lesson, tab) {
         <div class="vn-line">${lesson.title_vn}</div>
         ${lesson.goals && lesson.goals.length ? `
         <div class="goals">
-          <strong style="font-size:13px;">🎯 Mục tiêu bài học</strong>
+          <strong style="font-size:13px;">Mục tiêu bài học</strong>
           <ul>${lesson.goals.map(g => `<li>${g}</li>`).join('')}</ul>
         </div>` : ''}
       </div>
 
       <div class="tabs">
-        <button class="tab-btn" data-tab="vocab">📚 Từ vựng (${lesson.vocab.length})</button>
-        <button class="tab-btn" data-tab="grammar">📐 Ngữ pháp (${lesson.grammar.length})</button>
-        <button class="tab-btn" data-tab="texts">📝 Bài khóa (${lesson.texts.length})</button>
+        <button class="tab-btn" data-tab="vocab">Từ vựng (${lesson.vocab.length})</button>
+        <button class="tab-btn" data-tab="grammar">Ngữ pháp (${lesson.grammar.length})</button>
+        <button class="tab-btn" data-tab="texts">Bài khóa (${lesson.texts.length})</button>
       </div>
       <div id="tabContent"></div>
 
@@ -323,7 +339,7 @@ function renderGrammarTab(el, lesson) {
       <div class="explain">${g.explanation_vn}</div>
       ${g.examples && g.examples.length ? g.examples.map(ex => `
         <div class="example-row">
-          <div class="ex-cn hanzi">${ex.cn} <button class="vspeak" data-speak="${encodeURIComponent(ex.cn)}" title="Phát âm" style="font-size:13px;">🔊</button></div>
+          <div class="ex-cn hanzi">${ex.cn} <button class="vspeak vspeak-sm" data-speak="${encodeURIComponent(ex.cn)}" title="Phát âm">${SPEAKER_ICON_SVG}</button></div>
           ${ex.pinyin ? `<div class="ex-pinyin">${ex.pinyin}</div>` : ''}
           ${ex.vn ? `<div class="ex-vn">${ex.vn}</div>` : ''}
         </div>
@@ -338,22 +354,69 @@ function audioSrc(filename) {
   return APP_CONFIG.audioDir + encodeURIComponent(filename);
 }
 
+/* ===== Speaker avatars ===== */
+const AVATAR_DIR = '../assets/avatars/';
+// Chinese name -> avatar file stem (in Avatar/, exported to assets/avatars/)
+const CHAR_AVATAR = {
+  '王一雪': 'WangYixue', '白家月': 'BaiJiayue', '安妮': 'Annie', '王一飞': 'WangYifei',
+  '李文': 'LiWen', '陈天中': 'ChenTianzhong', '杨同乐': 'YangTongle', '刘明': 'LiuMing',
+  '刘小雪': 'LiuXiaoxue', '刘小明': 'LiuXiaoming'
+};
+const NAME_PINYIN = {
+  '王一雪': 'Wáng Yīxuě', '白家月': 'Bái Jiāyuè', '安妮': 'Annie', '王一飞': 'Wáng Yīfēi',
+  '李文': 'Lǐ Wén', '陈天中': 'Chén Tiānzhōng', '杨同乐': 'Yáng Tónglè', '刘明': 'Liú Míng',
+  '刘小雪': 'Liú Xiǎoxuě', '刘小明': 'Liú Xiǎomíng'
+};
+// Vietnamese/English-only speaker strings (no Chinese chars) -> Chinese key above
+const NAME_ALIAS = {
+  'Bạch Gia Nguyệt': '白家月', 'Trần Thiên Trung': '陈天中', 'Lý Văn': '李文',
+  'Vương Nhất Phi': '王一飞', 'Vương Nhất Tuyết': '王一雪', 'Lưu Minh': '刘明',
+  'Dương Đồng Lạc': '杨同乐', 'Dương Đồng Nhạc': '杨同乐', 'Annie': '安妮',
+  'Lưu Tiểu Tuyết': '刘小雪', 'Lưu Tiểu Minh': '刘小明'
+};
+function fallbackColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+  return `hsl(${hash % 360}, 50%, 52%)`;
+}
+function resolveSpeakers(raw) {
+  if (!raw) return [];
+  const zhMatches = raw.match(/[一-龥]+/g);
+  const tokens = (zhMatches && zhMatches.length) ? zhMatches
+    : raw.split(/\/|、|，|,/).map(s => s.trim()).filter(Boolean);
+  return tokens.map(tok => {
+    const zhKey = CHAR_AVATAR[tok] ? tok : NAME_ALIAS[tok];
+    if (zhKey && CHAR_AVATAR[zhKey]) {
+      return { label: zhKey, pinyin: NAME_PINYIN[zhKey] || '', avatar: AVATAR_DIR + CHAR_AVATAR[zhKey] + '.png' };
+    }
+    return { label: tok, pinyin: '', avatar: null, initial: tok.charAt(0), color: fallbackColor(tok) };
+  });
+}
+function avatarChipHtml(s) {
+  const pinyinLine = s.pinyin ? `<div class="avatar-pinyin">${s.pinyin}</div>` : '';
+  const face = s.avatar
+    ? `<img class="avatar-img" src="${s.avatar}" alt="${s.label}">`
+    : `<div class="avatar-fallback" style="background:${s.color}">${s.initial}</div>`;
+  return `<div class="avatar-chip">${face}${pinyinLine}<div class="avatar-label">${s.label}</div></div>`;
+}
+
 function renderTextsTab(el, lesson) {
   if (!lesson.texts.length) { el.innerHTML = `<div class="empty-state">Chưa có dữ liệu bài khóa.</div>`; return; }
   el.innerHTML = lesson.texts.map((t, ti) => {
+    const isPassage = t.type === 'passage';
     return `
     <div class="text-card" data-text-idx="${ti}">
-      <div class="text-label">${t.label} ${t.type === 'passage' ? '· Đoạn văn' : '· Hội thoại'}
+      <div class="text-label">${t.label} ${isPassage ? '· Đoạn văn' : '· Hội thoại'}
       </div>
       <div class="audio-row">
         ${t.audio_dialogue ? `
           <div class="audio-block">
-            <span class="audio-label">🎧 Băng nghe bài khóa</span>
+            <span class="audio-label">Băng nghe bài khóa</span>
             <audio controls preload="none" src="${audioSrc(t.audio_dialogue)}"></audio>
           </div>` : ''}
         ${t.audio_vocab ? `
           <div class="audio-block">
-            <span class="audio-label">🎧 Băng nghe từ mới</span>
+            <span class="audio-label">Băng nghe từ mới</span>
             <audio controls preload="none" src="${audioSrc(t.audio_vocab)}"></audio>
           </div>` : ''}
       </div>
@@ -362,19 +425,24 @@ function renderTextsTab(el, lesson) {
         <button class="toggle-chip on" data-toggle="vn">Bản dịch</button>
       </div>
       <div class="text-body">
-        ${t.type === 'dialogue' ? t.lines.map(l => `
-          <div class="dlg-line">
-            <div class="dlg-speaker">${l.speaker || ''}</div>
-            <div class="dlg-content">
-              <div class="dlg-cn hanzi">${l.cn}</div>
-              <div class="dlg-pinyin toggle-part-pinyin">${l.pinyin}</div>
-            </div>
+        ${isPassage ? `
+          <div class="diary-card">
+            <div class="passage-pinyin toggle-part-pinyin">${t.lines.map(l => l.pinyin).join(' ')}</div>
+            <div class="passage-cn hanzi">${t.lines.map(l => l.cn).join('')}</div>
+            ${t.translation_vn ? `<div class="passage-vn toggle-part-vn" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
           </div>
-        `).join('') : `
-          <div class="passage-cn hanzi">${t.lines.map(l => l.cn).join('')}</div>
-          <div class="passage-pinyin toggle-part-pinyin">${t.lines.map(l => l.pinyin).join(' ')}</div>
+        ` : `
+          ${t.lines.map(l => `
+            <div class="dlg-line">
+              <div class="dlg-avatars">${resolveSpeakers(l.speaker).map(avatarChipHtml).join('')}</div>
+              <div class="dlg-bubble">
+                <div class="dlg-pinyin toggle-part-pinyin">${l.pinyin}</div>
+                <div class="dlg-cn hanzi">${l.cn}</div>
+              </div>
+            </div>
+          `).join('')}
+          ${t.translation_vn ? `<div class="dlg-vn toggle-part-vn" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
         `}
-        ${t.translation_vn ? `<div class="${t.type === 'dialogue' ? 'dlg-vn' : 'passage-vn'} toggle-part-vn" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
       </div>
     </div>
   `;
@@ -404,7 +472,7 @@ let fcMode = 'hanzi'; // front shown
 function renderFlashcardSetup(main) {
   main.innerHTML = `
     <div class="main-inner">
-      <div class="section-title">🧠 Flashcard ôn tập</div>
+      <div class="section-title">Flashcard ôn tập</div>
       <div class="fc-setup">
         <label>Phạm vi ôn tập</label>
         <select id="fcScope">
@@ -420,7 +488,7 @@ function renderFlashcardSetup(main) {
         </div>
 
         <div style="margin-top:20px;">
-          <button class="btn btn-primary" id="fcStart">▶ Bắt đầu ôn tập</button>
+          <button class="btn btn-primary" id="fcStart">Bắt đầu ôn tập</button>
         </div>
       </div>
     </div>
@@ -466,7 +534,7 @@ function showFlashcard() {
   card.classList.remove('flipped');
   const progress = document.getElementById('fcProgress');
   if (fcIndex >= fcDeck.length) {
-    document.getElementById('fcFront').innerHTML = `<div style="font-size:20px;">🎉 Hoàn thành!</div><div class="fc-hint">Bạn đã ôn qua ${fcDeck.length} thẻ.</div>`;
+    document.getElementById('fcFront').innerHTML = `<div style="font-size:20px; display:flex; align-items:center; justify-content:center; gap:8px;">Hoàn thành!</div><div class="fc-hint">Bạn đã ôn qua ${fcDeck.length} thẻ.</div>`;
     document.getElementById('fcBack').innerHTML = '';
     progress.textContent = `${fcDeck.length} / ${fcDeck.length}`;
     document.getElementById('fcAnswers').style.visibility = 'hidden';
@@ -494,6 +562,81 @@ function fcNext(correct) {
   }
   fcIndex++;
   showFlashcard();
+}
+
+/* ===== Stroke order / handwriting practice (HanziWriter) ===== */
+let strokeChars = [];
+let strokeActiveIndex = 0;
+let strokeWriter = null;
+
+function openStrokeModal(v) {
+  strokeChars = v.hanzi.split('');
+  strokeActiveIndex = 0;
+  document.getElementById('strokeWordHanzi').textContent = v.hanzi;
+  document.getElementById('strokeWordMeta').textContent = `${v.pinyin}${v.vn ? ' · ' + v.vn : ''}`;
+
+  const tabs = document.getElementById('strokeCharTabs');
+  if (strokeChars.length > 1) {
+    tabs.style.display = 'flex';
+    tabs.innerHTML = strokeChars.map((c, i) => `<button class="stroke-char-tab ${i === 0 ? 'active' : ''}" data-idx="${i}">${c}</button>`).join('');
+    tabs.querySelectorAll('.stroke-char-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabs.querySelectorAll('.stroke-char-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        strokeActiveIndex = parseInt(btn.getAttribute('data-idx'), 10);
+        loadStrokeChar();
+      });
+    });
+  } else {
+    tabs.style.display = 'none';
+    tabs.innerHTML = '';
+  }
+
+  document.getElementById('strokeModal').classList.add('show');
+  loadStrokeChar();
+}
+
+function loadStrokeChar() {
+  const target = document.getElementById('strokeTarget');
+  target.innerHTML = '';
+  setStrokeFeedback('', '');
+  const char = strokeChars[strokeActiveIndex];
+  strokeWriter = HanziWriter.create(target, char, {
+    width: 260,
+    height: 260,
+    padding: 14,
+    showOutline: true,
+    strokeColor: '#2a2520',
+    outlineColor: '#ece4d8',
+    radicalColor: '#f5821f',
+    strokeAnimationSpeed: 1,
+    delayBetweenStrokes: 300
+  });
+}
+
+function setStrokeFeedback(html, kind) {
+  const el = document.getElementById('strokeFeedback');
+  el.innerHTML = html;
+  el.className = 'stroke-feedback' + (kind ? ' ' + kind : '');
+}
+
+function strokeAnimate() {
+  if (strokeWriter) strokeWriter.animateCharacter();
+}
+
+function strokeQuiz() {
+  if (!strokeWriter) return;
+  setStrokeFeedback('Hãy viết từng nét theo đúng thứ tự…', '');
+  strokeWriter.quiz({
+    showHintAfterMisses: 3,
+    onMistake: data => setStrokeFeedback(`Chưa đúng, thử lại nét ${data.strokeNum + 1}…`, 'warn'),
+    onCorrectStroke: data => setStrokeFeedback(`Đúng! Còn ${data.strokesRemaining} nét.`, 'ok'),
+    onComplete: data => setStrokeFeedback(data.totalMistakes === 0 ? `Hoàn hảo!` : `Hoàn thành! (sai ${data.totalMistakes} lần)`, 'done')
+  });
+}
+
+function closeStrokeModal() {
+  document.getElementById('strokeModal').classList.remove('show');
 }
 
 /* ===== Init / event wiring ===== */
@@ -539,11 +682,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('fcFlip').addEventListener('click', () => {
     document.getElementById('flashcard').classList.toggle('flipped');
   });
+  document.getElementById('fcSpeak').innerHTML = `${SPEAKER_ICON_SVG} Phát âm`;
   document.getElementById('fcSpeak').addEventListener('click', () => {
     if (fcIndex < fcDeck.length) speak(fcDeck[fcIndex].hanzi);
   });
   document.getElementById('fcWrong').addEventListener('click', () => fcNext(false));
   document.getElementById('fcCorrect').addEventListener('click', () => fcNext(true));
+
+  document.getElementById('strokeClose').addEventListener('click', closeStrokeModal);
+  document.getElementById('strokeAnimateBtn').addEventListener('click', strokeAnimate);
+  document.getElementById('strokeQuizBtn').addEventListener('click', strokeQuiz);
 
   if ('speechSynthesis' in window) {
     window.speechSynthesis.onvoiceschanged = () => {};
