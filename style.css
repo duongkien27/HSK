@@ -406,23 +406,17 @@ html, body {
 .level-card .level-meta { font-size: 13px; color: var(--muted); font-weight: 600; }
 
 /* Footer */
-.footer {
-    background: var(--card); border-top: 1px solid var(--line);
-    padding: 18px 16px; text-align: center; font-size: 13px; color: var(--muted);
-  }
-  .footer a { color: var(--orange-dark); text-decoration: none; }
-  .footer a:hover { text-decoration: underline; }
 .footer-counter {
-  margin-top: 30px;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #ffffff !important; /* Buộc chữ thành màu trắng */
-}
-
-.footer-counter span {
-  font-weight: bold;
-  color: #ffffff !important; /* Buộc số thành màu trắng */
-}
+    margin-top: 30px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #ffffff !important;
+  }
+  .footer-counter img {
+    vertical-align: middle;
+    filter: invert(1) grayscale(100%);
+    height: 20px;
+  }
 
 /* Responsive */
 @media (max-width: 860px) {

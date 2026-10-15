@@ -15,7 +15,6 @@
 
   gtag('config', 'G-205LXB6XP1');
 </script>
-
 </head>
 <body>
 
@@ -42,6 +41,7 @@
       </a>
     </div>
 
+    <!-- BỘ ĐẾM LƯỢT TRUY CẬP -->
     <div class="footer-counter">
       Lượt truy cập: <span id="visitor-count">...</span>
     </div>
@@ -49,13 +49,19 @@
 </div>
 
 <script>
-  fetch('https://counterapi.com/api/duongkien27.github.io-hsk/view')
+  const counterElement = document.getElementById('visitor-count');
+  
+  fetch('https://api.counterapi.dev/v1/duongkien27-hsk/visits/up')
     .then(response => response.json())
     .then(data => {
-      document.getElementById('visitor-count').textContent = data.upCount || data.count || 1;
+      if (data && data.count) {
+        counterElement.textContent = data.count;
+      } else {
+        counterElement.textContent = '1';
+      }
     })
     .catch(error => {
-      document.getElementById('visitor-count').textContent = '1';
+      counterElement.textContent = '1';
     });
 </script>
 
