@@ -405,18 +405,6 @@ html, body {
 }
 .level-card .level-meta { font-size: 13px; color: var(--muted); font-weight: 600; }
 
-/* Footer */
-.footer-counter {
-    margin-top: 30px;
-    text-align: center;
-    font-size: 0.9rem;
-    color: #ffffff !important;
-  }
-  .footer-counter img {
-    vertical-align: middle;
-    filter: invert(1) grayscale(100%);
-    height: 20px;
-  }
 
 /* Responsive */
 @media (max-width: 860px) {

@@ -40,30 +40,8 @@
         </div>
       </a>
     </div>
-
-    <!-- BỘ ĐẾM LƯỢT TRUY CẬP -->
-    <div class="footer-counter">
-      Lượt truy cập: <span id="visitor-count">...</span>
-    </div>
   </div>
 </div>
-
-<script>
-  const counterElement = document.getElementById('visitor-count');
-  
-  fetch('https://api.counterapi.dev/v1/duongkien27-hsk/visits/up')
-    .then(response => response.json())
-    .then(data => {
-      if (data && data.count) {
-        counterElement.textContent = data.count;
-      } else {
-        counterElement.textContent = '1';
-      }
-    })
-    .catch(error => {
-      counterElement.textContent = '1';
-    });
-</script>
 
 </body>
 </html>
