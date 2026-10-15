@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ôn tập HSK (3.0) - Chọn cấp độ</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-205LXB6XP1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-205LXB6XP1');
+</script>
+
 </head>
 <body>
 
@@ -30,8 +41,23 @@
         </div>
       </a>
     </div>
+
+    <div class="footer-counter">
+      Lượt truy cập: <span id="visitor-count">...</span>
+    </div>
   </div>
 </div>
+
+<script>
+  fetch('https://counterapi.com/api/duongkien27.github.io-hsk/view')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('visitor-count').textContent = data.upCount || data.count || 1;
+    })
+    .catch(error => {
+      document.getElementById('visitor-count').textContent = '1';
+    });
+</script>
 
 </body>
 </html>
