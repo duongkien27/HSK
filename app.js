@@ -3,6 +3,7 @@ const SPEAKER_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="ic
 const HOME_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-nav" aria-hidden="true"><path d="M12 2 3 10.5 5.5 10.5 5.5 21 18.5 21 18.5 10.5 21 10.5Z"/></svg>';
 const BOOK_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-nav" aria-hidden="true"><path d="M2 5 11 3 11 19 2 21Z"/><path d="M22 5 13 3 13 19 22 21Z"/></svg>';
 const CARDS_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-nav" aria-hidden="true"><rect x="7" y="2" width="13" height="9" rx="1.8" opacity="0.4"/><rect x="4" y="7" width="13" height="9" rx="1.8"/></svg>';
+const SWITCH_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-nav" aria-hidden="true"><path d="M7 6.5h11.19l-2.6-2.6L17 2.5l4.5 4.5L17 11.5l-1.41-1.41 2.6-2.59H7Z"/><path d="M17 17.5H5.81l2.6 2.6L7 21.5l-4.5-4.5L7 12.5l1.41 1.41-2.6 2.59H17Z"/></svg>';
 const CHECK_ICON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" class="icon-ui" aria-hidden="true"><path d="M9.55 17.65 4.4 12.5l1.65-1.65 3.5 3.5 8.4-8.4 1.65 1.65Z"/></svg>';
 const STAR_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" class="icon-ui" aria-hidden="true"><path d="M12,3 L13.6,9.1 L20.56,9.22 L15.42,13.11 L17.29,19.28 L12,15.6 L6.71,19.28 L8.58,13.11 L3.44,9.22 L10.4,9.1 Z"/></svg>';
 const LESSONS = APP_CONFIG.data.lessons;
@@ -123,6 +124,8 @@ function buildSidebar() {
     if (r) el.setAttribute('data-nav', r);
     if (r && NAV_ICONS[r]) el.innerHTML = `${NAV_ICONS[r]} ${el.textContent.trim()}`;
   });
+  const switchLink = document.getElementById('levelSwitchLink');
+  if (switchLink) switchLink.innerHTML = `${SWITCH_ICON_SVG} ${switchLink.textContent.trim()}`;
 }
 
 /* ===== Home ===== */
@@ -360,12 +363,12 @@ const AVATAR_DIR = '../assets/avatars/';
 const CHAR_AVATAR = {
   '王一雪': 'WangYixue', '白家月': 'BaiJiayue', '安妮': 'Annie', '王一飞': 'WangYifei',
   '李文': 'LiWen', '陈天中': 'ChenTianzhong', '杨同乐': 'YangTongle', '刘明': 'LiuMing',
-  '刘小雪': 'LiuXiaoxue', '刘小明': 'LiuXiaoming'
+  '刘小雪': 'LiuXiaoxue', '刘小明': 'LiuXiaoming', '小语': 'Xiaoyu'
 };
 const NAME_PINYIN = {
   '王一雪': 'Wáng Yīxuě', '白家月': 'Bái Jiāyuè', '安妮': 'Annie', '王一飞': 'Wáng Yīfēi',
   '李文': 'Lǐ Wén', '陈天中': 'Chén Tiānzhōng', '杨同乐': 'Yáng Tónglè', '刘明': 'Liú Míng',
-  '刘小雪': 'Liú Xiǎoxuě', '刘小明': 'Liú Xiǎomíng'
+  '刘小雪': 'Liú Xiǎoxuě', '刘小明': 'Liú Xiǎomíng', '小语': 'Xiǎoyǔ'
 };
 // Vietnamese/English-only speaker strings (no Chinese chars) -> Chinese key above
 const NAME_ALIAS = {
@@ -421,27 +424,27 @@ function renderTextsTab(el, lesson) {
           </div>` : ''}
       </div>
       <div class="toggle-row">
-        <button class="toggle-chip on" data-toggle="pinyin">Pinyin</button>
-        <button class="toggle-chip on" data-toggle="vn">Bản dịch</button>
+        <button class="toggle-chip" data-toggle="pinyin">Pinyin</button>
+        <button class="toggle-chip" data-toggle="vn">Bản dịch</button>
       </div>
       <div class="text-body">
         ${isPassage ? `
           <div class="diary-card">
-            <div class="passage-pinyin toggle-part-pinyin">${t.lines.map(l => l.pinyin).join(' ')}</div>
+            <div class="passage-pinyin toggle-part-pinyin hide-content">${t.lines.map(l => l.pinyin).join(' ')}</div>
             <div class="passage-cn hanzi">${t.lines.map(l => l.cn).join('')}</div>
-            ${t.translation_vn ? `<div class="passage-vn toggle-part-vn" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
+            ${t.translation_vn ? `<div class="passage-vn toggle-part-vn hide-content" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
           </div>
         ` : `
           ${t.lines.map(l => `
             <div class="dlg-line">
               <div class="dlg-avatars">${resolveSpeakers(l.speaker).map(avatarChipHtml).join('')}</div>
               <div class="dlg-bubble">
-                <div class="dlg-pinyin toggle-part-pinyin">${l.pinyin}</div>
+                <div class="dlg-pinyin toggle-part-pinyin hide-content">${l.pinyin}</div>
                 <div class="dlg-cn hanzi">${l.cn}</div>
               </div>
             </div>
           `).join('')}
-          ${t.translation_vn ? `<div class="dlg-vn toggle-part-vn" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
+          ${t.translation_vn ? `<div class="dlg-vn toggle-part-vn hide-content" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
         `}
       </div>
     </div>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ôn tập HSK4 (3.0) - New HSK 教程 4上</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+<div class="app">
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="icon-btn" id="menuToggle" title="Danh sách bài">☰</button>
+    <div class="brand">
+      <span class="brand-badge">HSK4</span>
+      <span class="brand-title">Ôn tập <strong>新HSK教程4上</strong> · chuẩn 3.0</span>
+    </div>
+    <div class="topbar-search">
+      <input type="search" id="globalSearch" placeholder="Tìm từ vựng (Hán tự / pinyin / nghĩa)…">
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <a href="../index.html" class="nav-item" id="levelSwitchLink">Đổi cấp độ</a>
+        <a href="#/home" class="nav-item" data-route="home">Trang chủ</a>
+        <a href="#/vocab-all" class="nav-item" data-route="vocab-all">Toàn bộ từ vựng</a>
+        <a href="#/flashcard" class="nav-item" data-route="flashcard">Flashcard ôn tập</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">10 Bài học</div>
+        <div id="lessonList" class="lesson-list"></div>
+      </div>
+    </nav>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Main content -->
+    <main class="main" id="main"></main>
+  </div>
+</div>
+
+<!-- Flashcard modal -->
+<div class="modal-overlay" id="flashcardModal">
+  <div class="modal flashcard-modal">
+    <div class="flashcard-header">
+      <span id="fcProgress">0 / 0</span>
+      <button class="icon-btn" id="fcClose">✕</button>
+    </div>
+    <div class="flashcard-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-face flashcard-front" id="fcFront"></div>
+        <div class="flashcard-face flashcard-back" id="fcBack"></div>
+      </div>
+    </div>
+    <div class="flashcard-controls">
+      <button class="btn btn-ghost" id="fcSpeak">Phát âm</button>
+      <button class="btn btn-ghost" id="fcFlip">↻ Lật thẻ</button>
+    </div>
+    <div class="flashcard-answers" id="fcAnswers">
+      <button class="btn btn-wrong" id="fcWrong">✗ Chưa thuộc</button>
+      <button class="btn btn-correct" id="fcCorrect">✓ Đã thuộc</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stroke order / handwriting practice modal -->
+<div class="modal-overlay" id="strokeModal">
+  <div class="modal stroke-modal">
+    <div class="stroke-header">
+      <div>
+        <div class="stroke-hanzi-title hanzi" id="strokeWordHanzi"></div>
+        <div class="stroke-word-meta" id="strokeWordMeta"></div>
+      </div>
+      <button class="icon-btn" id="strokeClose">✕</button>
+    </div>
+    <div class="stroke-char-tabs" id="strokeCharTabs"></div>
+    <div class="stroke-stage">
+      <div id="strokeTarget" class="stroke-target"></div>
+    </div>
+    <div class="stroke-feedback" id="strokeFeedback"></div>
+    <div class="stroke-controls">
+      <button class="btn btn-ghost" id="strokeAnimateBtn">▶ Xem thứ tự nét</button>
+      <button class="btn btn-primary" id="strokeQuizBtn">✍️ Tập viết</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/vendor/hanzi-writer.min.js"></script>
+<script src="data.js"></script>
+<script>
+  const APP_CONFIG = {
+    level: 'HSK4',
+    pageTitle: 'Ôn tập HSK4 (3.0) - New HSK 教程 4上',
+    bookLabelHtml: '新HSK教程4上',
+    data: HSK4_DATA,
+    audioDir: '../Audio/HSK4/',
+    storageKey: 'hsk4_known_v1'
+  };
+</script>
+<script src="../app.js"></script>
+</body>
+</html>
