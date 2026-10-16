@@ -403,8 +403,22 @@ function avatarChipHtml(s) {
   return `<div class="avatar-chip">${face}${pinyinLine}<div class="avatar-label">${s.label}</div></div>`;
 }
 
+function textImageSrc(lesson, ti) {
+  return `../assets/texts/${APP_CONFIG.level.toLowerCase()}/${lesson.id}-${ti + 1}.jpg`;
+}
+
+function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function buildVocabHighlighter(lesson) {
+  const words = [...new Set(lesson.vocab.map(v => v.hanzi).filter(Boolean))].sort((a, b) => b.length - a.length);
+  if (!words.length) return cn => cn;
+  const pattern = new RegExp(words.map(escapeRegExp).join('|'), 'g');
+  return cn => cn.replace(pattern, m => `<span class="new-word">${m}</span>`);
+}
+
 function renderTextsTab(el, lesson) {
   if (!lesson.texts.length) { el.innerHTML = `<div class="empty-state">Chưa có dữ liệu bài khóa.</div>`; return; }
+  const highlightCn = buildVocabHighlighter(lesson);
   el.innerHTML = lesson.texts.map((t, ti) => {
     const isPassage = t.type === 'passage';
     return `
@@ -423,29 +437,36 @@ function renderTextsTab(el, lesson) {
             <audio controls preload="none" src="${audioSrc(t.audio_vocab)}"></audio>
           </div>` : ''}
       </div>
-      <div class="toggle-row">
-        <button class="toggle-chip" data-toggle="pinyin">Pinyin</button>
-        <button class="toggle-chip" data-toggle="vn">Bản dịch</button>
-      </div>
-      <div class="text-body">
-        ${isPassage ? `
-          <div class="diary-card">
-            <div class="passage-pinyin toggle-part-pinyin hide-content">${t.lines.map(l => l.pinyin).join(' ')}</div>
-            <div class="passage-cn hanzi">${t.lines.map(l => l.cn).join('')}</div>
-            ${t.translation_vn ? `<div class="passage-vn toggle-part-vn hide-content" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
+      <div class="text-scene">
+        <div class="text-main">
+          <div class="toggle-row">
+            <button class="toggle-chip" data-toggle="pinyin">Pinyin</button>
+            <button class="toggle-chip" data-toggle="vn">Bản dịch</button>
           </div>
-        ` : `
-          ${t.lines.map(l => `
-            <div class="dlg-line">
-              <div class="dlg-avatars">${resolveSpeakers(l.speaker).map(avatarChipHtml).join('')}</div>
-              <div class="dlg-bubble">
-                <div class="dlg-pinyin toggle-part-pinyin hide-content">${l.pinyin}</div>
-                <div class="dlg-cn hanzi">${l.cn}</div>
+          <div class="text-body">
+            ${isPassage ? `
+              <div class="diary-card">
+                <div class="passage-pinyin toggle-part-pinyin hide-content">${t.lines.map(l => l.pinyin).join(' ')}</div>
+                <div class="passage-cn hanzi">${highlightCn(t.lines.map(l => l.cn).join(''))}</div>
+                ${t.translation_vn ? `<div class="passage-vn toggle-part-vn hide-content" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
               </div>
-            </div>
-          `).join('')}
-          ${t.translation_vn ? `<div class="dlg-vn toggle-part-vn hide-content" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
-        `}
+            ` : `
+              ${t.lines.map(l => `
+                <div class="dlg-line">
+                  <div class="dlg-avatars">${resolveSpeakers(l.speaker).map(avatarChipHtml).join('')}</div>
+                  <div class="dlg-bubble">
+                    <div class="dlg-pinyin toggle-part-pinyin hide-content">${l.pinyin}</div>
+                    <div class="dlg-cn hanzi">${highlightCn(l.cn)}</div>
+                  </div>
+                </div>
+              `).join('')}
+              ${t.translation_vn ? `<div class="dlg-vn toggle-part-vn hide-content" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
+            `}
+          </div>
+        </div>
+        <div class="text-illustration">
+          <img src="${textImageSrc(lesson, ti)}" alt="${t.label}" loading="lazy" onerror="this.parentElement.remove()">
+        </div>
       </div>
     </div>
   `;

@@ -236,6 +236,18 @@ html, body {
   padding: 18px 20px; margin-bottom: 16px;
 }
 .text-card .text-label { font-weight: 800; color: var(--orange-dark); margin-bottom: 10px; font-size: 14px; }
+.text-scene { display: flex; gap: 18px; align-items: flex-start; }
+.text-scene .text-main { flex: 1; min-width: 0; }
+.text-illustration {
+  flex: 0 0 38%; max-width: 320px; align-self: flex-start;
+  border-radius: 14px; overflow: hidden; position: sticky; top: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+.text-illustration img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 720px) {
+  .text-scene { flex-direction: column; }
+  .text-illustration { flex: none; max-width: none; width: 100%; max-height: 260px; position: static; order: -1; }
+}
 .audio-row { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
 .audio-block {
   display: flex; flex-direction: column; gap: 4px;
@@ -265,6 +277,7 @@ html, body {
 .dlg-pinyin { color: var(--orange-dark); font-size: 13px; margin-bottom: 2px; }
 .dlg-cn { font-size: 16.5px; line-height: 1.55; font-weight: 600; }
 .dlg-vn { color: var(--muted); font-size: 13.5px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.new-word { color: var(--red); }
 
 /* Passage — letter / diary page styling */
 .diary-card {
