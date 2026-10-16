@@ -74,6 +74,58 @@ html, body {
   outline: none;
 }
 
+/* Streak badge */
+.streak-badge {
+  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+  background: rgba(255,255,255,0.22); color: white;
+  padding: 7px 13px; border-radius: 20px; font-weight: 800; font-size: 14px;
+}
+.streak-badge.on-light { background: var(--orange-light); color: var(--orange-dark); }
+.streak-row { display: flex; justify-content: center; margin-bottom: 10px; }
+
+.streak-flame-wrap {
+  display: inline-block; font-size: 16px; line-height: 1;
+  filter: grayscale(0) brightness(1); opacity: 1;
+  transition: filter .7s ease, opacity .7s ease;
+}
+.streak-flame {
+  display: inline-block;
+  animation: streakFlicker 1.6s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+@keyframes streakFlicker {
+  0%, 100% { transform: scale(1) rotate(-3deg); }
+  25% { transform: scale(1.1, 0.92) rotate(3deg); }
+  50% { transform: scale(0.92, 1.08) rotate(-4deg); }
+  75% { transform: scale(1.06, 0.95) rotate(2deg); }
+}
+.streak-badge.gray .streak-flame-wrap { filter: grayscale(1) brightness(0.75); opacity: .55; }
+.streak-badge.extinguishing .streak-flame-wrap { filter: grayscale(1) brightness(0.55); opacity: .35; transition: filter .5s ease, opacity .5s ease; }
+.streak-badge.igniting .streak-flame-wrap { filter: grayscale(0) brightness(1.35); opacity: 1; transition: filter .45s ease, opacity .45s ease; }
+.streak-badge.lit .streak-flame-wrap { filter: grayscale(0) brightness(1); opacity: 1; }
+
+.streak-text { display: inline-block; transition: opacity .5s ease; opacity: 1; }
+.streak-badge.gray .streak-text { opacity: .55; }
+.streak-badge.extinguishing .streak-text { opacity: .35; transition: opacity .5s ease; }
+.streak-badge.igniting .streak-text, .streak-badge.lit .streak-text { opacity: 1; }
+
+.streak-badge.pulse { animation: streakPulse .6s ease; }
+@keyframes streakPulse {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.16); }
+  65% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.streak-count { display: inline-block; }
+
+.streak-debug-row { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 18px; }
+.streak-debug-row span { font-size: 12px; color: var(--muted); }
+.streak-debug-row button {
+  font-size: 12px; padding: 5px 11px; border-radius: 20px; cursor: pointer;
+  border: 1px dashed var(--line); background: var(--card); color: var(--muted); font-weight: 600;
+}
+.streak-debug-row button:hover { color: var(--orange-dark); border-color: var(--orange); }
+
 .layout { flex: 1; display: flex; min-height: 0; position: relative; }
 
 /* Sidebar */

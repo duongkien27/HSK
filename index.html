@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ôn tập HSK (3.0) - Chọn cấp độ</title>
+<link rel="icon" type="image/png" href="assets/icons/favicon-root.png">
 <link rel="stylesheet" href="style.css">
 
 <!-- Google tag (gtag.js) -->
@@ -15,11 +16,23 @@
 
   gtag('config', 'G-205LXB6XP1');
 </script>
+<script src="streak.js"></script>
 </head>
 <body>
 
 <div class="level-picker">
   <div class="level-picker-inner">
+    <div class="streak-row">
+      <div class="streak-badge on-light gray" id="streakBadge">
+        <span class="streak-flame-wrap"><span class="streak-flame">🔥</span></span>
+        <span class="streak-text"><span class="streak-count">0</span> ngày liên tiếp</span>
+      </div>
+    </div>
+    <!-- <div class="streak-debug-row">
+      <span>Debug:</span>
+      <button type="button" onclick="debugStreakContinue()">Nối chuỗi</button>
+      <button type="button" onclick="debugStreakBreak()">Cắt chuỗi</button>
+    </div> -->
     <div class="level-picker-head">
       <h1>欢迎 · Chọn cấp độ ôn tập</h1>
       <p>Ôn tập từ vựng, ngữ pháp và bài khóa theo giáo trình New HSK 教程 (chuẩn 3.0, bản tiếng Việt).</p>
