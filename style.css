@@ -346,7 +346,7 @@ html, body {
 }
 .passage-line + .passage-line { margin-top: 14px; }
 .passage-cn {
-  font-family: 'STKaiti', 'Kaiti SC', 'Kaiti TC', 'Baoli SC', '楷体', 'KaiTi', 'DFKai-SB', '標楷體', 'PingFang SC', 'Ma Shan Zheng', serif;
+  font-family: 'Ma Shan Zheng', 'STKaiti', 'Kaiti SC', 'Kaiti TC', 'Baoli SC', '楷体', 'KaiTi', 'DFKai-SB', '標楷體', 'PingFang SC', serif;
   font-size: 18.5px; line-height: 2.3; color: #3a2f22;
 }
 .passage-cn ruby { ruby-align: center; margin: 0 1px; }
