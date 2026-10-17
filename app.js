@@ -413,7 +413,63 @@ function buildVocabHighlighter(lesson) {
   const words = [...new Set(lesson.vocab.map(v => v.hanzi).filter(Boolean))].sort((a, b) => b.length - a.length);
   if (!words.length) return cn => cn;
   const pattern = new RegExp(words.map(escapeRegExp).join('|'), 'g');
-  return cn => cn.replace(pattern, m => `<span class="new-word">${m}</span>`);
+  return cn => cn.replace(pattern, m => `<span class="new-word" data-hanzi="${encodeURIComponent(m)}">${m}</span>`);
+}
+
+/* Word-by-word pinyin ruby for passage ("letter/diary") texts, like the printed textbook:
+   the pinyin string is split on whitespace into word tokens (as authored), each token's
+   syllable count is inferred from its vowel-letter runs (y/w act as consonants, so every
+   Mandarin syllable boundary shows up as a new run), and that many hanzi characters are
+   paired with it as one <ruby> group so pinyin wrapping always stays aligned to its word. */
+const PINYIN_VOWEL_RUN_RE = new RegExp('[' +
+  'aeiouvAEIOUV' +
+  'āáǎàĀÁǍÀ' + 'ēéěèĒÉĚÈ' + 'īíǐìĪÍǏÌ' + 'ōóǒòŌÓǑÒ' + 'ūúǔùŭŬŪÚǓÙ' + 'ǖǘǚǜǕǗǙǛ' + 'üÜ' +
+  ']+', 'g');
+const CJK_RE = /[一-鿿㐀-䶿0-9]/;
+const PASSAGE_PUNCT_RE = /[，！？。、：；（）“”…—,.!?;:()'"]/;
+
+function countPinyinSyllables(core) {
+  const matches = core.match(PINYIN_VOWEL_RUN_RE);
+  let syll = matches ? matches.length : 0;
+  // Erhua (儿) fuses onto the previous syllable with no vowel of its own
+  // (e.g. "diǎnr" = 点 + 儿, "miàntiáor" = 面 + 条 + 儿), adding a hanzi
+  // character the vowel-run count alone can't see — except the small set
+  // of syllables where trailing "r" IS the whole final (二/儿/而/耳 itself).
+  const stripped = core.replace(/[^A-Za-zÀ-ɏ]/g, '').toLowerCase();
+  const isBareErWord = /^[eéèěē]r$/.test(stripped);
+  const hasApostropheBeforeEr = /['’][eéèěē]r$/i.test(core);
+  if (stripped.endsWith('r') && !isBareErWord && !hasApostropheBeforeEr) syll += 1;
+  return syll;
+}
+
+function buildPassageRuby(cn, pinyinLine, highlightCn) {
+  const tokens = (pinyinLine || '').trim().split(/\s+/).filter(Boolean);
+  let ci = 0;
+  const out = [];
+  tokens.forEach(tok => {
+    // Punctuation-only tokens (a lone "—" authored with spaces around it, stray
+    // quote marks, etc.) have no syllable of their own — skip without consuming
+    // any hanzi; the leading-punctuation sweep below will carry them to output.
+    const m = tok.match(/[A-Za-zÀ-ɏ'-]+/);
+    if (!m) return;
+    const core = m[0];
+    const syll = Math.max(1, countPinyinSyllables(core));
+    let leading = '';
+    while (ci < cn.length && PASSAGE_PUNCT_RE.test(cn[ci])) { leading += cn[ci]; ci++; }
+    let group = '';
+    let got = 0;
+    while (got < syll && ci < cn.length) {
+      const ch = cn[ci++];
+      group += ch;
+      if (CJK_RE.test(ch)) got++;
+    }
+    let trailing = '';
+    while (ci < cn.length && PASSAGE_PUNCT_RE.test(cn[ci])) { trailing += cn[ci]; ci++; }
+    if (group) out.push(`${leading}<ruby>${highlightCn(group)}<rt>${core}</rt></ruby>${trailing}`);
+    else out.push(leading);
+  });
+  if (ci < cn.length) out.push(highlightCn(cn.slice(ci)));
+  return out.join('');
 }
 
 function renderTextsTab(el, lesson) {
@@ -442,12 +498,16 @@ function renderTextsTab(el, lesson) {
           <div class="toggle-row">
             <button class="toggle-chip" data-toggle="pinyin">Pinyin</button>
             <button class="toggle-chip" data-toggle="vn">Bản dịch</button>
+            <span class="toggle-note">Chọn các từ mới để xem nghĩa</span>
           </div>
           <div class="text-body">
             ${isPassage ? `
               <div class="diary-card">
-                <div class="passage-pinyin toggle-part-pinyin hide-content">${t.lines.map(l => l.pinyin).join(' ')}</div>
-                <div class="passage-cn hanzi">${highlightCn(t.lines.map(l => l.cn).join(''))}</div>
+                ${t.lines.map(l => `
+                  <div class="passage-line">
+                    <div class="passage-cn hanzi toggle-ruby-pinyin ruby-hide">${buildPassageRuby(l.cn, l.pinyin, highlightCn)}</div>
+                  </div>
+                `).join('')}
                 ${t.translation_vn ? `<div class="passage-vn toggle-part-vn hide-content" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
               </div>
             ` : `
@@ -477,8 +537,16 @@ function renderTextsTab(el, lesson) {
       chip.classList.toggle('on');
       const card = chip.closest('.text-card');
       const kind = chip.getAttribute('data-toggle');
-      const parts = card.querySelectorAll(`.toggle-part-${kind}`);
-      parts.forEach(p => p.classList.toggle('hide-content', !chip.classList.contains('on')));
+      const on = chip.classList.contains('on');
+      card.querySelectorAll(`.toggle-part-${kind}`).forEach(p => p.classList.toggle('hide-content', !on));
+      card.querySelectorAll(`.toggle-ruby-${kind}`).forEach(p => p.classList.toggle('ruby-hide', !on));
+    });
+  });
+  el.querySelectorAll('.new-word').forEach(span => {
+    span.addEventListener('click', () => {
+      const hanzi = decodeURIComponent(span.getAttribute('data-hanzi'));
+      const v = lesson.vocab.find(x => x.hanzi === hanzi);
+      if (v) openWordModal(v);
     });
   });
   attachVocabRowEvents(el);
@@ -663,6 +731,18 @@ function closeStrokeModal() {
   document.getElementById('strokeModal').classList.remove('show');
 }
 
+/* ===== New-word meaning popup (click a highlighted word in bài khóa) ===== */
+function openWordModal(v) {
+  document.getElementById('wordHanzi').textContent = v.hanzi;
+  document.getElementById('wordPinyin').textContent = v.pinyin || '';
+  document.getElementById('wordPos').textContent = v.pos || '';
+  document.getElementById('wordVn').textContent = v.vn || '';
+  document.getElementById('wordModal').classList.add('show');
+}
+function closeWordModal() {
+  document.getElementById('wordModal').classList.remove('show');
+}
+
 /* ===== Init / event wiring ===== */
 function closeMobileSidebar() {
   document.getElementById('sidebar').classList.remove('open');
@@ -716,6 +796,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('strokeClose').addEventListener('click', closeStrokeModal);
   document.getElementById('strokeAnimateBtn').addEventListener('click', strokeAnimate);
   document.getElementById('strokeQuizBtn').addEventListener('click', strokeQuiz);
+
+  document.getElementById('wordClose').addEventListener('click', closeWordModal);
+  document.getElementById('wordSpeak').addEventListener('click', () => {
+    const h = document.getElementById('wordHanzi').textContent;
+    if (h) speak(h);
+  });
 
   if ('speechSynthesis' in window) {
     window.speechSynthesis.onvoiceschanged = () => {};

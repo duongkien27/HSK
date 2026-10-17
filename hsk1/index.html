@@ -6,6 +6,9 @@
 <title>Ôn tập HSK1 (3.0) - New HSK 教程 1</title>
 <link rel="icon" type="image/png" href="../assets/icons/favicon-root.png">
 <link rel="stylesheet" href="../style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap">
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
@@ -90,6 +93,23 @@
     <div class="stroke-controls">
       <button class="btn btn-ghost" id="strokeAnimateBtn">▶ Xem thứ tự nét</button>
       <button class="btn btn-primary" id="strokeQuizBtn">✍️ Tập viết</button>
+    </div>
+  </div>
+</div>
+
+<!-- New-word meaning popup -->
+<div class="modal-overlay" id="wordModal">
+  <div class="modal word-modal">
+    <div class="flashcard-header">
+      <span>Từ vựng</span>
+      <button class="icon-btn" id="wordClose">✕</button>
+    </div>
+    <div class="word-modal-body">
+      <div class="word-hanzi hanzi" id="wordHanzi"></div>
+      <div class="word-pinyin" id="wordPinyin"></div>
+      <div class="word-pos" id="wordPos"></div>
+      <div class="word-vn" id="wordVn"></div>
+      <button class="btn btn-ghost" id="wordSpeak">Phát âm</button>
     </div>
   </div>
 </div>

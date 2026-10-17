@@ -36,6 +36,7 @@
     <div class="level-picker-head">
       <h1>欢迎 · Chọn cấp độ ôn tập</h1>
       <p>Ôn tập từ vựng, ngữ pháp và bài khóa theo giáo trình New HSK 教程 (chuẩn 3.0, bản tiếng Việt).</p>
+      <button type="button" class="btn btn-ghost" id="featuresBtn" onclick="document.getElementById('featuresModal').classList.add('show')">Xem các chức năng chính</button>
     </div>
     <div class="level-grid">
       <a class="level-card" href="hsk1/index.html">
@@ -67,6 +68,21 @@
         </div>
       </a>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="featuresModal">
+  <div class="modal features-modal">
+    <div class="flashcard-header">
+      <span>Các chức năng chính</span>
+      <button type="button" class="icon-btn" onclick="document.getElementById('featuresModal').classList.remove('show')">✕</button>
+    </div>
+    <ul class="features-list">
+      <li><strong>Chọn cấp độ</strong> &ndash; HSK1 đến HSK4, mỗi cấp độ gồm nhiều bài học theo giáo trình New HSK 教程 (chuẩn 3.0).</li>
+      <li><strong>Ngữ pháp &amp; bài khóa</strong> &ndash; ôn lại điểm ngữ pháp và nội dung bài khóa (kèm file audio chuẩn) của từng bài.</li>
+      <li><strong>Học từ vựng</strong> &ndash; xem Hán tự, pinyin, nghĩa tiếng Việt và luyện với flashcard lật thẻ. Đặc biệt, xem lịch sử hình thành của chữ Hán qua tài liệu Hán văn giải tự.</li>
+      <li><strong>Luyện viết chữ</strong> &ndash; tập viết theo thứ tự nét (stroke order) cho từng Hán tự.</li>
+    </ul>
   </div>
 </div>
 
