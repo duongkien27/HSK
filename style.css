@@ -433,6 +433,8 @@ html, body {
 .word-pos { font-size: 12px; color: var(--muted); }
 .word-vn { font-size: 17px; font-weight: 600; margin-top: 4px; }
 .word-modal-body .btn { margin-top: 10px; }
+.word-modal-actions { display: flex; gap: 8px; margin-top: 10px; }
+.word-modal-actions .btn { margin-top: 0; }
 
 /* Stroke order / handwriting practice modal */
 .modal.stroke-modal {

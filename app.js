@@ -732,7 +732,9 @@ function closeStrokeModal() {
 }
 
 /* ===== New-word meaning popup (click a highlighted word in bài khóa) ===== */
+let currentWordVocab = null;
 function openWordModal(v) {
+  currentWordVocab = v;
   document.getElementById('wordHanzi').textContent = v.hanzi;
   document.getElementById('wordPinyin').textContent = v.pinyin || '';
   document.getElementById('wordPos').textContent = v.pos || '';
@@ -801,6 +803,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('wordSpeak').addEventListener('click', () => {
     const h = document.getElementById('wordHanzi').textContent;
     if (h) speak(h);
+  });
+  document.getElementById('wordWriteBtn').addEventListener('click', () => {
+    if (!currentWordVocab) return;
+    closeWordModal();
+    openStrokeModal(currentWordVocab);
   });
 
   if ('speechSynthesis' in window) {
