@@ -217,6 +217,13 @@ function attachVocabRowEvents(container) {
       if (hc) hc.textContent = knownCount();
     });
   });
+  container.querySelectorAll('.vocab-row').forEach(row => {
+    row.addEventListener('click', e => {
+      if (e.target.closest('button')) return;
+      const v = ALL_VOCAB.find(x => x.key === row.getAttribute('data-key'));
+      if (v) openWordModal(v);
+    });
+  });
 }
 
 /* ===== Vocab-all page ===== */
@@ -334,19 +341,23 @@ function renderVocabTab(el, lesson) {
   renderList();
 }
 
+function exampleRowHtml(ex) {
+  return `
+    <div class="example-row">
+      <div class="ex-cn hanzi">${ex.cn} <button class="vspeak vspeak-sm" data-speak="${encodeURIComponent(ex.cn)}" title="Phát âm">${SPEAKER_ICON_SVG}</button></div>
+      ${ex.pinyin ? `<div class="ex-pinyin">${ex.pinyin}</div>` : ''}
+      ${ex.vn ? `<div class="ex-vn">${ex.vn}</div>` : ''}
+    </div>
+  `;
+}
+
 function renderGrammarTab(el, lesson) {
   if (!lesson.grammar.length) { el.innerHTML = `<div class="empty-state">Chưa có dữ liệu ngữ pháp.</div>`; return; }
   el.innerHTML = lesson.grammar.map(g => `
     <div class="grammar-card">
       <h3 class="hanzi">${g.title}</h3>
       <div class="explain">${g.explanation_vn}</div>
-      ${g.examples && g.examples.length ? g.examples.map(ex => `
-        <div class="example-row">
-          <div class="ex-cn hanzi">${ex.cn} <button class="vspeak vspeak-sm" data-speak="${encodeURIComponent(ex.cn)}" title="Phát âm">${SPEAKER_ICON_SVG}</button></div>
-          ${ex.pinyin ? `<div class="ex-pinyin">${ex.pinyin}</div>` : ''}
-          ${ex.vn ? `<div class="ex-vn">${ex.vn}</div>` : ''}
-        </div>
-      `).join('') : ''}
+      ${g.examples && g.examples.length ? g.examples.map(exampleRowHtml).join('') : ''}
     </div>
   `).join('');
   attachVocabRowEvents(el);
@@ -637,13 +648,16 @@ function showFlashcard() {
   progress.textContent = `${fcIndex + 1} / ${fcDeck.length}`;
   const front = document.getElementById('fcFront');
   const back = document.getElementById('fcBack');
+  const examplesHtml = v.examples && v.examples.length
+    ? `<div class="fc-examples">${v.examples.map(exampleRowHtml).join('')}</div>` : '';
   if (fcMode === 'hanzi') {
     front.innerHTML = `<div class="fc-hanzi hanzi">${v.hanzi}</div><div class="fc-hint">Chạm để lật thẻ</div>`;
-    back.innerHTML = `<div class="fc-pinyin">${v.pinyin}</div><div class="fc-pos">${v.pos || ''}</div><div class="fc-vn">${v.vn}</div>`;
+    back.innerHTML = `<div class="fc-pinyin">${v.pinyin}</div><div class="fc-pos">${v.pos || ''}</div><div class="fc-vn">${v.vn}</div>${examplesHtml}`;
   } else {
     front.innerHTML = `<div class="fc-vn">${v.vn}</div><div class="fc-hint">Chạm để lật thẻ</div>`;
-    back.innerHTML = `<div class="fc-hanzi hanzi">${v.hanzi}</div><div class="fc-pinyin">${v.pinyin}</div><div class="fc-pos">${v.pos || ''}</div>`;
+    back.innerHTML = `<div class="fc-hanzi hanzi">${v.hanzi}</div><div class="fc-pinyin">${v.pinyin}</div><div class="fc-pos">${v.pos || ''}</div>${examplesHtml}`;
   }
+  attachVocabRowEvents(back);
 }
 
 function fcNext(correct) {
@@ -739,6 +753,9 @@ function openWordModal(v) {
   document.getElementById('wordPinyin').textContent = v.pinyin || '';
   document.getElementById('wordPos').textContent = v.pos || '';
   document.getElementById('wordVn').textContent = v.vn || '';
+  const exEl = document.getElementById('wordExamples');
+  exEl.innerHTML = v.examples && v.examples.length ? v.examples.map(exampleRowHtml).join('') : '<div class="empty-state">Chưa có ví dụ.</div>';
+  attachVocabRowEvents(exEl);
   document.getElementById('wordModal').classList.add('show');
 }
 function closeWordModal() {
