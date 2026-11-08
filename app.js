@@ -341,6 +341,31 @@ function renderVocabTab(el, lesson) {
   renderList();
 }
 
+function qaSectionHtml(questions) {
+  if (!questions || !questions.length) return '';
+  return `
+    <div class="qa-section">
+      <div class="qa-title">Câu hỏi đọc hiểu</div>
+      ${questions.map((q, qi) => `
+        <div class="qa-item">
+          <div class="qa-question">
+            <span class="qa-num">${qi + 1}.</span>
+            <div class="qa-q-text">
+              <div class="qa-q-cn hanzi">${q.q_cn} <button class="vspeak vspeak-sm" data-speak="${encodeURIComponent(q.q_cn)}" title="Phát âm">${SPEAKER_ICON_SVG}</button></div>
+              <div class="qa-q-vn">${q.q_vn}</div>
+            </div>
+          </div>
+          <button class="qa-reveal" data-qa-reveal>Xem đáp án</button>
+          <div class="qa-answer hide-content">
+            <div class="qa-a-cn hanzi">${q.a_cn}</div>
+            <div class="qa-a-vn">${q.a_vn}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 function exampleRowHtml(ex) {
   return `
     <div class="example-row">
@@ -534,6 +559,7 @@ function renderTextsTab(el, lesson) {
               ${t.translation_vn ? `<div class="dlg-vn toggle-part-vn hide-content" style="white-space:pre-line;">${t.translation_vn}</div>` : ''}
             `}
           </div>
+          ${qaSectionHtml(t.questions)}
         </div>
         <div class="text-illustration">
           <img src="${textImageSrc(lesson, ti)}" alt="${t.label}" loading="lazy" onerror="this.parentElement.remove()">
@@ -551,6 +577,14 @@ function renderTextsTab(el, lesson) {
       const on = chip.classList.contains('on');
       card.querySelectorAll(`.toggle-part-${kind}`).forEach(p => p.classList.toggle('hide-content', !on));
       card.querySelectorAll(`.toggle-ruby-${kind}`).forEach(p => p.classList.toggle('ruby-hide', !on));
+    });
+  });
+  el.querySelectorAll('[data-qa-reveal]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.qa-item');
+      const answer = item.querySelector('.qa-answer');
+      const isHidden = answer.classList.toggle('hide-content');
+      btn.textContent = isHidden ? 'Xem đáp án' : 'Ẩn đáp án';
     });
   });
   el.querySelectorAll('.new-word').forEach(span => {
@@ -635,6 +669,13 @@ function closeFlashcardModal() {
 function showFlashcard() {
   const card = document.getElementById('flashcard');
   card.classList.remove('flipped');
+  const stage = document.getElementById('flashcardStage');
+  stage.classList.remove('dragging');
+  stage.style.transition = '';
+  stage.style.transform = '';
+  stage.style.opacity = '';
+  document.getElementById('fcSwipeYes').style.opacity = 0;
+  document.getElementById('fcSwipeNo').style.opacity = 0;
   const progress = document.getElementById('fcProgress');
   if (fcIndex >= fcDeck.length) {
     document.getElementById('fcFront').innerHTML = `<div style="font-size:20px; display:flex; align-items:center; justify-content:center; gap:8px;">Hoàn thành!</div><div class="fc-hint">Bạn đã ôn qua ${fcDeck.length} thẻ.</div>`;
@@ -668,6 +709,90 @@ function fcNext(correct) {
   }
   fcIndex++;
   showFlashcard();
+}
+
+/* Swipe right = "Đã thuộc" (correct), swipe left = "Chưa thuộc" (incorrect).
+   Drag is applied to the stage wrapper (translateX + rotate) so it never
+   fights with the card's own rotateY flip transform. touch-action:pan-y on
+   the stage lets the browser keep native vertical scrolling (for long
+   back-side content) while horizontal drags are delivered to us as
+   pointermove events instead of being eaten by page scroll. */
+function setupFlashcardSwipe() {
+  const stage = document.getElementById('flashcardStage');
+  const card = document.getElementById('flashcard');
+  const hintYes = document.getElementById('fcSwipeYes');
+  const hintNo = document.getElementById('fcSwipeNo');
+  const THRESHOLD = 90;
+  let dragging = false;
+  let moved = false;
+  let startX = 0;
+  let pointerId = null;
+
+  function setHints(dx) {
+    const progress = Math.min(Math.abs(dx) / THRESHOLD, 1);
+    hintYes.style.opacity = dx > 0 ? progress : 0;
+    hintNo.style.opacity = dx < 0 ? progress : 0;
+  }
+  function resetStage() {
+    stage.classList.remove('dragging');
+    stage.style.transition = '';
+    stage.style.transform = '';
+    hintYes.style.opacity = 0;
+    hintNo.style.opacity = 0;
+  }
+
+  stage.addEventListener('pointerdown', e => {
+    if (fcIndex >= fcDeck.length) return;
+    if (e.target.closest('button, a, audio, input, .toggle-chip')) return;
+    dragging = true;
+    moved = false;
+    startX = e.clientX;
+    pointerId = e.pointerId;
+    stage.setPointerCapture(pointerId);
+    stage.classList.add('dragging');
+  });
+
+  stage.addEventListener('pointermove', e => {
+    if (!dragging || e.pointerId !== pointerId) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 5) moved = true;
+    stage.style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)`;
+    setHints(dx);
+  });
+
+  function onRelease(e) {
+    if (!dragging || e.pointerId !== pointerId) return;
+    dragging = false;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > THRESHOLD) {
+      const correct = dx > 0;
+      const dir = correct ? 1 : -1;
+      stage.classList.remove('dragging');
+      stage.style.transition = 'transform .3s ease, opacity .3s ease';
+      stage.style.transform = `translateX(${dir * 700}px) rotate(${dir * 26}deg)`;
+      stage.style.opacity = '0';
+      setTimeout(() => {
+        stage.style.transition = '';
+        stage.style.transform = '';
+        stage.style.opacity = '';
+        hintYes.style.opacity = 0;
+        hintNo.style.opacity = 0;
+        fcNext(correct);
+      }, 260);
+    } else if (moved) {
+      stage.classList.remove('dragging');
+      stage.style.transition = 'transform .25s ease';
+      stage.style.transform = '';
+      hintYes.style.opacity = 0;
+      hintNo.style.opacity = 0;
+      setTimeout(() => { stage.style.transition = ''; }, 260);
+    } else {
+      resetStage();
+      card.classList.toggle('flipped');
+    }
+  }
+  stage.addEventListener('pointerup', onRelease);
+  stage.addEventListener('pointercancel', resetStage);
 }
 
 /* ===== Stroke order / handwriting practice (HanziWriter) ===== */
@@ -799,9 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('fcClose').addEventListener('click', closeFlashcardModal);
-  document.getElementById('flashcard').addEventListener('click', () => {
-    document.getElementById('flashcard').classList.toggle('flipped');
-  });
+  setupFlashcardSwipe();
   document.getElementById('fcFlip').addEventListener('click', () => {
     document.getElementById('flashcard').classList.toggle('flipped');
   });
