@@ -416,6 +416,7 @@ html, body {
 .modal-overlay {
   display: none; position: fixed; inset: 0; background: rgba(30,20,10,0.55);
   align-items: center; justify-content: center; z-index: 100; padding: 16px;
+  overscroll-behavior: contain;
 }
 .modal-overlay.show { display: flex; }
 .modal.flashcard-modal {

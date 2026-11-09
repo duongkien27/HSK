@@ -734,6 +734,8 @@ function setupFlashcardSwipe() {
     hintNo.style.opacity = dx < 0 ? progress : 0;
   }
   function resetStage() {
+    dragging = false;
+    stage.style.touchAction = '';
     stage.classList.remove('dragging');
     stage.style.transition = '';
     stage.style.transform = '';
@@ -748,6 +750,12 @@ function setupFlashcardSwipe() {
     moved = false;
     startX = e.clientX;
     pointerId = e.pointerId;
+    /* Claim the gesture for JS immediately, before the browser can commit it
+       to native vertical panning (which would otherwise hand the touchmove
+       off to whatever scrollable ancestor it finds — including the page
+       behind the modal when the card content is short enough not to need
+       its own scroll — dropping our swipe). Restored on release. */
+    stage.style.touchAction = 'none';
     stage.setPointerCapture(pointerId);
     stage.classList.add('dragging');
   });
@@ -758,11 +766,13 @@ function setupFlashcardSwipe() {
     if (Math.abs(dx) > 5) moved = true;
     stage.style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)`;
     setHints(dx);
+    e.preventDefault();
   });
 
   function onRelease(e) {
     if (!dragging || e.pointerId !== pointerId) return;
     dragging = false;
+    stage.style.touchAction = '';
     const dx = e.clientX - startX;
     if (Math.abs(dx) > THRESHOLD) {
       const correct = dx > 0;
