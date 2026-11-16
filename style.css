@@ -524,7 +524,7 @@ html, body {
   display: flex; flex-direction: column;
 }
 .level-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.28); }
-.level-card .level-cover { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top; display: block; }
+.level-card .level-cover { width: 100%; aspect-ratio: 3/2; object-fit: cover; object-position: top; display: block; }
 .level-info {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 14px 16px;
@@ -537,6 +537,7 @@ html, body {
 .level-badge.badge-hsk2 { background: #f5a623; }
 .level-badge.badge-hsk3 { background: #f5821f; }
 .level-badge.badge-hsk4 { background: #7cb342; }
+.level-badge.badge-hsk4b { background: #00ab45; }
 .level-card .level-meta { font-size: 13px; color: var(--muted); font-weight: 600; }
 
 
