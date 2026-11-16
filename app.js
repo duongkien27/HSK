@@ -713,10 +713,18 @@ function fcNext(correct) {
 
 /* Swipe right = "Đã thuộc" (correct), swipe left = "Chưa thuộc" (incorrect).
    Drag is applied to the stage wrapper (translateX + rotate) so it never
-   fights with the card's own rotateY flip transform. touch-action:pan-y on
-   the stage lets the browser keep native vertical scrolling (for long
-   back-side content) while horizontal drags are delivered to us as
-   pointermove events instead of being eaten by page scroll. */
+   fights with the card's own rotateY flip transform.
+
+   The stage uses touch-action:none (set in CSS, permanently — toggling it
+   from inside a pointerdown handler is too late on real phones: the
+   browser's touch/pan decision for a gesture is made before JS runs, so a
+   touch-action change made after the gesture has started doesn't apply to
+   it). With no native panning on the stage at all, every drag — horizontal
+   or not — reaches us as pointermove and never leaks to whatever scrollable
+   element the browser would otherwise hand it to (including the page behind
+   the modal). Because that also disables the browser's own vertical
+   scrolling of long back-side content, we scroll it manually here when a
+   drag turns out to be vertical-dominant. */
 function setupFlashcardSwipe() {
   const stage = document.getElementById('flashcardStage');
   const card = document.getElementById('flashcard');
@@ -725,7 +733,9 @@ function setupFlashcardSwipe() {
   const THRESHOLD = 90;
   let dragging = false;
   let moved = false;
+  let mode = null; // 'swipe' | 'scroll', decided once movement is clear
   let startX = 0;
+  let lastY = 0;
   let pointerId = null;
 
   function setHints(dx) {
@@ -735,7 +745,6 @@ function setupFlashcardSwipe() {
   }
   function resetStage() {
     dragging = false;
-    stage.style.touchAction = '';
     stage.classList.remove('dragging');
     stage.style.transition = '';
     stage.style.transform = '';
@@ -748,14 +757,10 @@ function setupFlashcardSwipe() {
     if (e.target.closest('button, a, audio, input, .toggle-chip')) return;
     dragging = true;
     moved = false;
+    mode = null;
     startX = e.clientX;
+    lastY = e.clientY;
     pointerId = e.pointerId;
-    /* Claim the gesture for JS immediately, before the browser can commit it
-       to native vertical panning (which would otherwise hand the touchmove
-       off to whatever scrollable ancestor it finds — including the page
-       behind the modal when the card content is short enough not to need
-       its own scroll — dropping our swipe). Restored on release. */
-    stage.style.touchAction = 'none';
     stage.setPointerCapture(pointerId);
     stage.classList.add('dragging');
   });
@@ -763,16 +768,29 @@ function setupFlashcardSwipe() {
   stage.addEventListener('pointermove', e => {
     if (!dragging || e.pointerId !== pointerId) return;
     const dx = e.clientX - startX;
-    if (Math.abs(dx) > 5) moved = true;
+    const dyStep = e.clientY - lastY;
+    lastY = e.clientY;
+    if (!mode) {
+      if (Math.abs(dx) > 5 || Math.abs(dyStep) > 5) {
+        moved = true;
+        mode = Math.abs(dx) > Math.abs(dyStep) ? 'swipe' : 'scroll';
+        if (mode === 'scroll') stage.classList.remove('dragging');
+      }
+    }
+    if (mode === 'scroll') {
+      const face = card.classList.contains('flipped')
+        ? document.getElementById('fcBack') : document.getElementById('fcFront');
+      face.scrollTop -= dyStep;
+      return;
+    }
     stage.style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)`;
     setHints(dx);
-    e.preventDefault();
   });
 
   function onRelease(e) {
     if (!dragging || e.pointerId !== pointerId) return;
     dragging = false;
-    stage.style.touchAction = '';
+    if (mode === 'scroll') return;
     const dx = e.clientX - startX;
     if (Math.abs(dx) > THRESHOLD) {
       const correct = dx > 0;
