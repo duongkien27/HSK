@@ -658,12 +658,28 @@ function shuffle(arr) {
   }
 }
 
+let lockedScrollY = 0;
+function lockBodyScroll() {
+  lockedScrollY = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${lockedScrollY}px`;
+  document.body.style.width = '100%';
+}
+function unlockBodyScroll() {
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, lockedScrollY);
+}
+
 function openFlashcardModal() {
   document.getElementById('flashcardModal').classList.add('show');
+  lockBodyScroll();
   showFlashcard();
 }
 function closeFlashcardModal() {
   document.getElementById('flashcardModal').classList.remove('show');
+  unlockBodyScroll();
 }
 
 function showFlashcard() {
